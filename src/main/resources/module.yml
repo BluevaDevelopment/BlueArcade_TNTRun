@@ -1,0 +1,12 @@
+name: TNT Run
+id: tnt_run
+version: 1.0.0
+type: MINIGAME
+api-version: 1.0
+main: net.blueva.arcade.modules.tntrun.TNTRunModule
+
+authors:
+  - Blueva
+  - Whiron
+
+description: "TNT Run minigame - outrun the collapsing floor to survive."
