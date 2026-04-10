@@ -12,6 +12,7 @@ import net.blueva.arcade.modules.tntrun.support.TNTRunFallingBlockService;
 import net.blueva.arcade.modules.tntrun.support.TNTRunJumpService;
 import net.blueva.arcade.modules.tntrun.support.TNTRunLoadoutService;
 import net.blueva.arcade.modules.tntrun.support.TNTRunMessagingService;
+import net.blueva.arcade.modules.tntrun.support.TNTRunSettings;
 import net.blueva.arcade.modules.tntrun.support.TNTRunStatsService;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -40,6 +41,7 @@ public class TNTRunGameManager {
     private final TNTRunBlockService blockService;
     private final TNTRunFallingBlockService fallingBlockService;
     private final TNTRunJumpService jumpService;
+    private final TNTRunSettings settings;
 
     private final Map<Integer, TNTRunArenaState> arenaStates = new ConcurrentHashMap<>();
     private final Map<Player, Integer> playerArenas = new ConcurrentHashMap<>();
@@ -52,7 +54,8 @@ public class TNTRunGameManager {
                              TNTRunMessagingService messagingService,
                              TNTRunBlockService blockService,
                              TNTRunFallingBlockService fallingBlockService,
-                             TNTRunJumpService jumpService) {
+                             TNTRunJumpService jumpService,
+                             TNTRunSettings settings) {
         this.moduleInfo = moduleInfo;
         this.moduleConfig = moduleConfig;
         this.coreConfig = coreConfig;
@@ -62,6 +65,7 @@ public class TNTRunGameManager {
         this.blockService = blockService;
         this.fallingBlockService = fallingBlockService;
         this.jumpService = jumpService;
+        this.settings = settings;
     }
 
     public void handleStart(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context) {
@@ -105,10 +109,10 @@ public class TNTRunGameManager {
 
         messagingService.sendStartTitle(context);
         startGameTimer(context, state);
+        startTrailScanTimer(context, state);
         blockService.startFloorRemovalTimers(context, state);
 
         for (Player player : context.getPlayers()) {
-            player.setGameMode(GameMode.SURVIVAL);
             loadoutService.giveStartingItems(player);
             loadoutService.applyStartingEffects(player);
             jumpService.initializeJumps(state, player);
@@ -175,6 +179,45 @@ public class TNTRunGameManager {
         }, 0L, 20L);
     }
 
+    private void startTrailScanTimer(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
+                                     TNTRunArenaState state) {
+        int arenaId = context.getArenaId();
+        int intervalTicks = Math.max(1, settings.getDetectionStationaryScanTicks());
+        String taskId = "arena_" + arenaId + "_tnt_run_trail_scan";
+
+        context.getSchedulerAPI().runTimer(taskId, () -> {
+            if (state.isEnded()) {
+                context.getSchedulerAPI().cancelTask(taskId);
+                return;
+            }
+
+            if (context.getPhase() != GamePhase.PLAYING) {
+                return;
+            }
+
+            for (Player player : context.getAlivePlayers()) {
+                if (player == null || !player.isOnline()) {
+                    continue;
+                }
+
+                if (!context.isPlayerPlaying(player)) {
+                    continue;
+                }
+
+                Location location = player.getLocation();
+                if (blockService.shouldEliminate(context, location)) {
+                    handlePlayerElimination(player);
+                    continue;
+                }
+
+                // Update player position tracking for stationary detection
+                blockService.updatePlayerPosition(context, state, player, location);
+
+                blockService.handlePlayerStep(context, state, player, location);
+            }
+        }, 0L, intervalTicks);
+    }
+
     private void endGameOnce(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
                              TNTRunArenaState state) {
         if (state.markEnded()) {
@@ -228,6 +271,11 @@ public class TNTRunGameManager {
             return;
         }
 
+        // Don't eliminate spectators
+        if (context.getSpectators().contains(player)) {
+            return;
+        }
+
         int arenaId = context.getArenaId();
         TNTRunArenaState state = arenaStates.get(arenaId);
         if (state == null) {
@@ -241,8 +289,32 @@ public class TNTRunGameManager {
         messagingService.sendDeathMessage(context, player);
         context.eliminatePlayer(player, moduleConfig.getStringFrom("language.yml", "messages.eliminated"));
         player.getInventory().clear();
+        
+        // Clear double jump state without modifying flight (we'll set it correctly below)
+        jumpService.clearJumps(state, player, false);
+        
+        // Teleport player to spawn point to prevent falling in void
+        Location spawn = context.getArenaAPI().getRandomSpawn();
+        if (spawn != null) {
+            player.teleport(spawn);
+        }
+        
+        // Set to spectator mode immediately
         player.setGameMode(GameMode.SPECTATOR);
-        jumpService.clearJumps(state, player);
+        
+        // Schedule flight activation 1 second later to avoid conflicts with double jump mechanics
+        context.getSchedulerAPI().runLater(
+                "tnt_run_spectator_flight_" + arenaId + "_" + player.getUniqueId(),
+                () -> {
+                    // Only enable flight if player is still in spectator mode
+                    if (player.isOnline() && player.getGameMode() == GameMode.SPECTATOR) {
+                        player.setAllowFlight(true);
+                        player.setFlying(true);
+                    }
+                },
+                20L // 1 second delay
+        );
+        
         context.getSoundsAPI().play(player, coreConfig.getSound("sounds.in_game.respawn"));
     }
 
@@ -266,6 +338,11 @@ public class TNTRunGameManager {
         }
 
         if (!context.isPlayerPlaying(player)) {
+            return;
+        }
+
+        // Don't touch flight state for spectators - they need it to move
+        if (player.getGameMode() == GameMode.SPECTATOR) {
             return;
         }
 
@@ -374,6 +451,11 @@ public class TNTRunGameManager {
         }
 
         if (!context.isPlayerPlaying(player)) {
+            return false;
+        }
+
+        // Don't handle double jump for spectators - they have normal flight
+        if (player.getGameMode() == GameMode.SPECTATOR) {
             return false;
         }
 

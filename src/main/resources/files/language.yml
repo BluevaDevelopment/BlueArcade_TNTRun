@@ -25,6 +25,11 @@ vote_menu:
     - "<white>{votes}</white> <gray>votes.</gray>"
 
 stats:
+
+  descriptions:
+    wins: "TNT Run wins"
+    games_played: "TNT Run games played"
+    blocks_dropped: "Blocks dropped in TNT Run"
   labels:
     blocks_dropped: "Blocks dropped"
     games_played: "TNT Run games played"

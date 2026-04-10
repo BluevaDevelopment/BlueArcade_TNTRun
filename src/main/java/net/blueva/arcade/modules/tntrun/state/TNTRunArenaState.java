@@ -25,6 +25,8 @@ public class TNTRunArenaState {
     private final Set<TNTRunBlockKey> removedBlocks = ConcurrentHashMap.newKeySet();
     private final Set<UUID> eliminatedPlayers = ConcurrentHashMap.newKeySet();
     private final ConcurrentMap<UUID, Integer> doubleJumps = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, TNTRunBlockKey> lastPlayerPosition = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, Integer> playerStationaryTicks = new ConcurrentHashMap<>();
     private final int maxDoubleJumps;
     private volatile boolean ended;
     private volatile int timeLeft;
@@ -85,11 +87,21 @@ public class TNTRunArenaState {
         this.timeLeft = timeLeft;
     }
 
+    public ConcurrentMap<UUID, TNTRunBlockKey> getLastPlayerPosition() {
+        return lastPlayerPosition;
+    }
+
+    public ConcurrentMap<UUID, Integer> getPlayerStationaryTicks() {
+        return playerStationaryTicks;
+    }
+
     public void clearTracking() {
         scheduledBlocks.clear();
         removedBlocks.clear();
         eliminatedPlayers.clear();
         doubleJumps.clear();
+        lastPlayerPosition.clear();
+        playerStationaryTicks.clear();
     }
 
     public TNTRunFloor findFloorAt(TNTRunBlockKey key) {

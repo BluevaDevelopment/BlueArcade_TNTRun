@@ -1,6 +1,6 @@
 # TNT Run Module Settings
 
-file_version: 1
+file_version: 2
 
 # Visual representation in menus
 menus:
@@ -24,6 +24,13 @@ trail:
     additional_blocks_below: 1
     # Sensitivity for detecting edges/corners to remove neighboring blocks
     edge_threshold: 0.25
+    # How often (in ticks) to rescan players who are standing still
+    stationary_scan_ticks: 4
+    # Maximum ticks a player can stay in the same block before aggressive block breaking (20 ticks = 1 seconds)
+    # This prevents players from cheating by staying in corners or edges
+    stationary_max_ticks: 20
+    # Radius of blocks to break around a stationary player (1 = 3x3 area)
+    stationary_break_radius: 1
 
 floors:
   # Default auto-remove time (seconds) for a new floor (0 = disabled)

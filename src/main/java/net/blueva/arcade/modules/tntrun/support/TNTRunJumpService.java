@@ -40,9 +40,18 @@ public class TNTRunJumpService {
     }
 
     public void clearJumps(TNTRunArenaState state, Player player) {
+        clearJumps(state, player, true);
+    }
+    
+    public void clearJumps(TNTRunArenaState state, Player player, boolean updateFlightState) {
         state.getDoubleJumps().remove(player.getUniqueId());
-        player.setAllowFlight(false);
-        player.setFlying(false);
+        if (updateFlightState) {
+            // Don't disable flight for spectators - they need it to move
+            if (player.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
+                player.setAllowFlight(false);
+                player.setFlying(false);
+            }
+        }
     }
 
     public boolean performDoubleJump(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,

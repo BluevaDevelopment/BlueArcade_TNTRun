@@ -4,6 +4,7 @@ import net.blueva.arcade.api.module.ModuleInfo;
 import net.blueva.arcade.api.stats.StatDefinition;
 import net.blueva.arcade.api.stats.StatScope;
 import net.blueva.arcade.api.stats.StatsAPI;
+import net.blueva.arcade.api.config.ModuleConfigAPI;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -15,11 +16,13 @@ public class TNTRunStatsService {
 
     private final StatsAPI statsAPI;
     private final ModuleInfo moduleInfo;
+    private final ModuleConfigAPI moduleConfig;
     private final Map<Integer, UUID> arenaWinners = new ConcurrentHashMap<>();
 
-    public TNTRunStatsService(StatsAPI statsAPI, ModuleInfo moduleInfo) {
+    public TNTRunStatsService(StatsAPI statsAPI, ModuleInfo moduleInfo, ModuleConfigAPI moduleConfig) {
         this.statsAPI = statsAPI;
         this.moduleInfo = moduleInfo;
+        this.moduleConfig = moduleConfig;
     }
 
     public void registerStats() {
@@ -28,11 +31,11 @@ public class TNTRunStatsService {
         }
 
         statsAPI.registerModuleStat(moduleInfo.getId(),
-                new StatDefinition("wins", "Wins", "TNT Run wins", StatScope.MODULE));
+                new StatDefinition("wins", moduleConfig.getStringFrom("language.yml", "stats.labels.wins", "Wins"), moduleConfig.getStringFrom("language.yml", "stats.descriptions.wins", "TNT Run wins"), StatScope.MODULE));
         statsAPI.registerModuleStat(moduleInfo.getId(),
-                new StatDefinition("games_played", "Games Played", "TNT Run games played", StatScope.MODULE));
+                new StatDefinition("games_played", moduleConfig.getStringFrom("language.yml", "stats.labels.games_played", "Games Played"), moduleConfig.getStringFrom("language.yml", "stats.descriptions.games_played", "TNT Run games played"), StatScope.MODULE));
         statsAPI.registerModuleStat(moduleInfo.getId(),
-                new StatDefinition("blocks_dropped", "Blocks dropped", "Blocks dropped in TNT Run", StatScope.MODULE));
+                new StatDefinition("blocks_dropped", moduleConfig.getStringFrom("language.yml", "stats.labels.blocks_dropped", "Blocks dropped"), moduleConfig.getStringFrom("language.yml", "stats.descriptions.blocks_dropped", "Blocks dropped in TNT Run"), StatScope.MODULE));
     }
 
     public void resetArena(int arenaId) {

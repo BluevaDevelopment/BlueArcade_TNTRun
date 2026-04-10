@@ -12,6 +12,9 @@ public class TNTRunSettings {
     private int detectionScanDepth = 3;
     private int detectionAdditionalBelow = 1;
     private double detectionEdgeThreshold = 0.25;
+    private int detectionStationaryScanTicks = 4;
+    private int detectionStationaryMaxTicks = 8;
+    private int detectionStationaryBreakRadius = 2;
     private int floorDelayTicks = 10;
     private int floorDelayMinTicks = 1;
     private int floorDelayMaxTicks = 100;
@@ -25,7 +28,7 @@ public class TNTRunSettings {
     private double doubleJumpBoostMin = 0.1;
     private double doubleJumpBoostMax = 2.0;
     private boolean particlesEnabled = true;
-    private Particle particleType = Particle.BLOCK;
+        private Particle particleType = Particle.BLOCK;
     private int particleCount = 12;
     private double particleSpread = 0.35;
     private double particleSpeed = 0.15;
@@ -37,6 +40,9 @@ public class TNTRunSettings {
         detectionScanDepth = Math.max(1, moduleConfig.getInt("trail.detection.scan_depth", 3));
         detectionAdditionalBelow = Math.max(0, moduleConfig.getInt("trail.detection.additional_blocks_below", 1));
         detectionEdgeThreshold = Math.max(0.0, moduleConfig.getDouble("trail.detection.edge_threshold", 0.25));
+        detectionStationaryScanTicks = Math.max(1, moduleConfig.getInt("trail.detection.stationary_scan_ticks", 4));
+        detectionStationaryMaxTicks = Math.max(1, moduleConfig.getInt("trail.detection.stationary_max_ticks", 8));
+        detectionStationaryBreakRadius = Math.max(1, moduleConfig.getInt("trail.detection.stationary_break_radius", 2));
 
         floorDelayTicks = Math.max(1, moduleConfig.getInt("trail.floor_delay_ticks", 10));
         floorDelayMinTicks = Math.max(1, moduleConfig.getInt("trail.floor_delay_limits.min", 1));
@@ -85,6 +91,18 @@ public class TNTRunSettings {
 
     public double getDetectionEdgeThreshold() {
         return detectionEdgeThreshold;
+    }
+
+    public int getDetectionStationaryScanTicks() {
+        return detectionStationaryScanTicks;
+    }
+
+    public int getDetectionStationaryMaxTicks() {
+        return detectionStationaryMaxTicks;
+    }
+
+    public int getDetectionStationaryBreakRadius() {
+        return detectionStationaryBreakRadius;
     }
 
     public int getFloorDelayTicks() {

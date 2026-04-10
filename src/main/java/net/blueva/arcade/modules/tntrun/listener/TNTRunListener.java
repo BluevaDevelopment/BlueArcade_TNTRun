@@ -40,6 +40,11 @@ public class TNTRunListener implements Listener {
             return;
         }
 
+        // Spectators should not trigger sand physics
+        if (player.getGameMode() == org.bukkit.GameMode.SPECTATOR) {
+            return;
+        }
+
         Location to = event.getTo();
         if (to == null) {
             return;

@@ -482,4 +482,133 @@ public class TNTRunBlockService {
             return null;
         }
     }
+
+    public void updatePlayerPosition(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
+                                     TNTRunArenaState state,
+                                     Player player,
+                                     Location location) {
+        UUID playerId = player.getUniqueId();
+        TNTRunBlockKey currentBlockKey = TNTRunBlockKey.from(location);
+
+        if (currentBlockKey == null) {
+            return;
+        }
+
+        TNTRunBlockKey lastBlockKey = state.getLastPlayerPosition().get(playerId);
+
+        if (lastBlockKey == null || !lastBlockKey.equals(currentBlockKey)) {
+            // Player moved to a different block, reset stationary counter
+            state.getLastPlayerPosition().put(playerId, currentBlockKey);
+            state.getPlayerStationaryTicks().put(playerId, 0);
+        } else {
+            // Player is still in the same block, increment stationary counter by scan interval
+            // This ensures we count real ticks, not scan iterations
+            int scanInterval = settings.getDetectionStationaryScanTicks();
+            int stationaryTicks = state.getPlayerStationaryTicks().getOrDefault(playerId, 0) + scanInterval;
+            state.getPlayerStationaryTicks().put(playerId, stationaryTicks);
+
+            // Check if player has been stationary for too long
+            if (stationaryTicks >= settings.getDetectionStationaryMaxTicks()) {
+                breakBlocksAroundPlayer(context, state, player, location);
+                // Reset counter after breaking blocks to avoid breaking too frequently
+                state.getPlayerStationaryTicks().put(playerId, 0);
+            }
+        }
+    }
+
+    private void breakBlocksAroundPlayer(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
+                                        TNTRunArenaState state,
+                                        Player player,
+                                        Location location) {
+        World world = location.getWorld();
+        if (world == null) {
+            return;
+        }
+
+        int radius = settings.getDetectionStationaryBreakRadius();
+        int playerX = location.getBlockX();
+        int playerZ = location.getBlockZ();
+
+        // Search downward from the player's position to find floor blocks
+        for (int depth = 0; depth <= settings.getDetectionScanDepth(); depth++) {
+            int baseY = location.getBlockY() - depth;
+
+            // Break blocks in a radius around the player at this depth
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    Block targetBlock = world.getBlockAt(playerX + x, baseY, playerZ + z);
+
+                    if (targetBlock.getType() != Material.AIR &&
+                        targetBlock.getType() != Material.BARRIER &&
+                        targetBlock.getType() != Material.BEDROCK) {
+
+                        TNTRunBlockKey targetKey = TNTRunBlockKey.from(targetBlock.getLocation());
+                        if (targetKey != null) {
+                            TNTRunFloor floor = state.findFloorAt(targetKey);
+                            if (floor != null) {
+                                scheduleAggressiveBlockRemoval(context, state, targetBlock, targetKey, player.getUniqueId());
+
+                                // Also break additional blocks below
+                                for (int i = 1; i <= settings.getDetectionAdditionalBelow(); i++) {
+                                    Block belowBlock = world.getBlockAt(playerX + x, baseY - i, playerZ + z);
+                                    TNTRunBlockKey belowKey = TNTRunBlockKey.from(belowBlock.getLocation());
+                                    if (belowKey != null && belowBlock.getType() != Material.AIR &&
+                                        belowBlock.getType() != Material.BARRIER &&
+                                        belowBlock.getType() != Material.BEDROCK) {
+                                        TNTRunFloor belowFloor = state.findFloorAt(belowKey);
+                                        if (belowFloor != null) {
+                                            scheduleAggressiveBlockRemoval(context, state, belowBlock, belowKey, player.getUniqueId());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void scheduleAggressiveBlockRemoval(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
+                                                TNTRunArenaState state,
+                                                Block block,
+                                                TNTRunBlockKey key,
+                                                UUID trigger) {
+        if (block.getType() == Material.AIR || block.getType() == Material.BARRIER || block.getType() == Material.BEDROCK) {
+            return;
+        }
+
+        Block blockBelow = block.getLocation().clone().subtract(0, 1, 0).getBlock();
+        if (blockBelow.getType() == Material.BEDROCK || blockBelow.getType() == Material.BARRIER) {
+            return;
+        }
+
+        // Don't check scheduledBlocks - aggressive removal should override normal scheduling
+        if (state.getRemovedBlocks().contains(key)) {
+            return;
+        }
+
+        TNTRunFloor floor = state.findFloorAt(key);
+        if (floor == null) {
+            return;
+        }
+
+        state.getScheduledBlocks().add(key);
+        String taskId = "arena_" + context.getArenaId() + "_tnt_run_aggressive_block_" + key;
+        Location blockLocation = block.getLocation();
+
+        // Use minimal delay (1 tick) for aggressive removal
+        context.getSchedulerAPI().runLater(taskId, () -> {
+            if (state.isEnded()) {
+                state.getScheduledBlocks().remove(key);
+                return;
+            }
+
+            context.getSchedulerAPI().runAtLocation(blockLocation, () -> {
+                Block target = blockLocation.getBlock();
+                handleBlockRemoval(context, state, target, key, trigger);
+                state.getScheduledBlocks().remove(key);
+            });
+        }, 1L);
+    }
 }

@@ -62,7 +62,7 @@ public class TNTRunModule implements GameModule<Player, Location, World, Materia
         TNTRunSettings settings = new TNTRunSettings();
         settings.load(moduleConfig);
 
-        TNTRunStatsService statsService = new TNTRunStatsService(statsAPI, moduleInfo);
+        TNTRunStatsService statsService = new TNTRunStatsService(statsAPI, moduleInfo, moduleConfig);
         statsService.registerStats();
 
         TNTRunLoadoutService loadoutService = new TNTRunLoadoutService(moduleConfig);
@@ -72,7 +72,7 @@ public class TNTRunModule implements GameModule<Player, Location, World, Materia
         TNTRunJumpService jumpService = new TNTRunJumpService(settings);
 
         gameManager = new TNTRunGameManager(moduleInfo, moduleConfig, coreConfig, statsService,
-                loadoutService, messagingService, blockService, fallingBlockService, jumpService);
+                loadoutService, messagingService, blockService, fallingBlockService, jumpService, settings);
 
         if (achievementsAPI != null) {
             achievementsAPI.registerModuleAchievements(moduleInfo.getId(), "achievements.yml");
