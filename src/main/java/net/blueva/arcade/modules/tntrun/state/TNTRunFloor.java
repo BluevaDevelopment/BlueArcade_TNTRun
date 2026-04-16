@@ -58,6 +58,30 @@ public class TNTRunFloor {
         return new ArrayList<>(blocks);
     }
 
+    /**
+     * Returns the explicit block list if one was configured, otherwise generates
+     * all block locations within the floor's bounding box at runtime.
+     */
+    public List<Location> getBlockLocations() {
+        if (!blocks.isEmpty()) {
+            return new ArrayList<>(blocks);
+        }
+        if (min == null || max == null || min.getWorld() == null) {
+            return new ArrayList<>();
+        }
+        int[] bounds = getNormalizedIntBounds();
+        World world = min.getWorld();
+        List<Location> locations = new ArrayList<>();
+        for (int x = bounds[0]; x <= bounds[1]; x++) {
+            for (int y = bounds[2]; y <= bounds[3]; y++) {
+                for (int z = bounds[4]; z <= bounds[5]; z++) {
+                    locations.add(new Location(world, x, y, z));
+                }
+            }
+        }
+        return locations;
+    }
+
     public boolean contains(Location location) {
         if (location == null || location.getWorld() == null) {
             return false;
@@ -65,14 +89,47 @@ public class TNTRunFloor {
         if (!isWithinBounds(location)) {
             return false;
         }
-        return blockKeys.contains(TNTRunBlockKey.from(location));
+        if (!blockKeys.isEmpty()) {
+            return blockKeys.contains(TNTRunBlockKey.from(location));
+        }
+        // Bounds-only mode: anything within bounds is part of the floor
+        return true;
     }
 
     public boolean contains(TNTRunBlockKey key) {
         if (key == null) {
             return false;
         }
-        return blockKeys.contains(key);
+        if (!blockKeys.isEmpty()) {
+            return blockKeys.contains(key);
+        }
+        // Bounds-only mode: fall back to coordinate bounds check
+        return isWithinBoundsKey(key);
+    }
+
+    private boolean isWithinBoundsKey(TNTRunBlockKey key) {
+        if (min == null || max == null || min.getWorld() == null) {
+            return false;
+        }
+        if (!min.getWorld().getName().equals(key.getWorld())) {
+            return false;
+        }
+        int[] b = getNormalizedIntBounds();
+        return key.getX() >= b[0] && key.getX() <= b[1]
+                && key.getY() >= b[2] && key.getY() <= b[3]
+                && key.getZ() >= b[4] && key.getZ() <= b[5];
+    }
+
+    /** Returns [minX, maxX, minY, maxY, minZ, maxZ] as integer block coordinates. */
+    private int[] getNormalizedIntBounds() {
+        return new int[]{
+                (int) Math.min(min.getX(), max.getX()),
+                (int) Math.max(min.getX(), max.getX()),
+                (int) Math.min(min.getY(), max.getY()),
+                (int) Math.max(min.getY(), max.getY()),
+                (int) Math.min(min.getZ(), max.getZ()),
+                (int) Math.max(min.getZ(), max.getZ())
+        };
     }
 
     public Location getCenter() {

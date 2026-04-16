@@ -133,11 +133,7 @@ public class TNTRunBlockService {
         }
 
         List<String> blockList = context.getDataAccess().getGameData(basePath + ".blocks", List.class);
-        if (blockList == null || blockList.isEmpty()) {
-            return null;
-        }
-
-        List<Location> blocks = parseBlocks(blockList);
+        List<Location> blocks = (blockList != null && !blockList.isEmpty()) ? parseBlocks(blockList) : new ArrayList<>();
 
         Integer autoRemove = context.getDataAccess().getGameData(basePath + ".auto_remove_time", Integer.class);
         int autoRemoveTime = autoRemove != null ? autoRemove : settings.getDefaultAutoRemoveSeconds();
@@ -193,7 +189,7 @@ public class TNTRunBlockService {
         }
 
         context.getSchedulerAPI().runAtLocation(center, () -> {
-            for (Location blockLocation : floor.getBlocks()) {
+            for (Location blockLocation : floor.getBlockLocations()) {
                 if (blockLocation.getWorld() == null) {
                     continue;
                 }
