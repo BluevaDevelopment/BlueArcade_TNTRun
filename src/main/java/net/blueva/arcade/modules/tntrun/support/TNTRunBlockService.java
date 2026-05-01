@@ -133,7 +133,8 @@ public class TNTRunBlockService {
         }
 
         List<String> blockList = context.getDataAccess().getGameData(basePath + ".blocks", List.class);
-        List<Location> blocks = (blockList != null && !blockList.isEmpty()) ? parseBlocks(blockList) : new ArrayList<>();
+        World arenaWorld = context.getArenaAPI() != null ? context.getArenaAPI().getWorld() : null;
+        List<Location> blocks = (blockList != null && !blockList.isEmpty()) ? parseBlocks(blockList, arenaWorld) : new ArrayList<>();
 
         Integer autoRemove = context.getDataAccess().getGameData(basePath + ".auto_remove_time", Integer.class);
         int autoRemoveTime = autoRemove != null ? autoRemove : settings.getDefaultAutoRemoveSeconds();
@@ -284,7 +285,7 @@ public class TNTRunBlockService {
 
         Particle particle = settings.getParticleType();
         Location particleLocation = block.getLocation().add(0.5, 0.5, 0.5);
-        if (particle == Particle.BLOCK) {
+        if (isBlockParticle(particle)) {
             block.getWorld().spawnParticle(particle, particleLocation,
                     settings.getParticleCount(), settings.getParticleSpread(),
                     settings.getParticleSpread() * 0.6, settings.getParticleSpread(),
@@ -409,7 +410,7 @@ public class TNTRunBlockService {
         }
     }
 
-    private List<Location> parseBlocks(List<String> blockList) {
+    private List<Location> parseBlocks(List<String> blockList, World fallbackWorld) {
         List<Location> locations = new ArrayList<>();
         if (blockList == null) {
             return locations;
@@ -426,6 +427,9 @@ public class TNTRunBlockService {
             }
 
             World world = Bukkit.getWorld(parts[0]);
+            if (world == null) {
+                world = fallbackWorld;
+            }
             if (world == null) {
                 continue;
             }
@@ -606,5 +610,10 @@ public class TNTRunBlockService {
                 state.getScheduledBlocks().remove(key);
             });
         }, 1L);
+    }
+
+    private boolean isBlockParticle(Particle particle) {
+        String name = particle.name();
+        return name.equals("BLOCK") || name.equals("BLOCK_CRACK");
     }
 }

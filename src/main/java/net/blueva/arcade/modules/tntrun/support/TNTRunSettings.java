@@ -28,7 +28,7 @@ public class TNTRunSettings {
     private double doubleJumpBoostMin = 0.1;
     private double doubleJumpBoostMax = 2.0;
     private boolean particlesEnabled = true;
-        private Particle particleType = Particle.BLOCK;
+    private Particle particleType = parseParticle("BLOCK");
     private int particleCount = 12;
     private double particleSpread = 0.35;
     private double particleSpeed = 0.15;
@@ -187,9 +187,17 @@ public class TNTRunSettings {
 
     private Particle parseParticle(String name) {
         try {
-            return Particle.valueOf(name.toUpperCase());
+            String upper = name.toUpperCase();
+            if ("BLOCK".equals(upper)) {
+                try {
+                    return Particle.valueOf("BLOCK");
+                } catch (IllegalArgumentException ignored) {
+                    return Particle.valueOf("BLOCK_CRACK");
+                }
+            }
+            return Particle.valueOf(upper);
         } catch (Exception e) {
-            return Particle.BLOCK;
+            return Particle.BLOCK_CRACK;
         }
     }
 }
