@@ -45,7 +45,7 @@ public class TNTRunSetup implements GameSetupHandler {
         }
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
-                coreConfig.getLanguage("admin_commands.errors.unknown_subcommand"));
+                coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.unknown_subcommand"));
         return true;
     }
 
@@ -98,7 +98,7 @@ public class TNTRunSetup implements GameSetupHandler {
 
         if (!hasFloor && context.getSender() != null) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.not_configured")
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.not_configured")
                             .replace("{arena_id}", String.valueOf(context.getArenaId())));
         }
 
@@ -108,7 +108,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleFloor(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(1)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_floor"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_floor"));
             return true;
         }
 
@@ -122,7 +122,7 @@ public class TNTRunSetup implements GameSetupHandler {
             case "removal" -> handleFloorRemoval(context);
             default -> {
                 context.getMessagesAPI().sendRaw(context.getPlayer(),
-                        moduleConfig.getStringFrom("language.yml", "setup_messages.usage_floor"));
+                        moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_floor"));
                 yield true;
             }
         };
@@ -131,7 +131,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleFloorAdd(SetupContext<Player, CommandSender, Location> context) {
         if (!context.isPlayer()) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    coreConfig.getLanguage("admin_commands.errors.must_be_player"));
+                    coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.must_be_player"));
             return true;
         }
 
@@ -139,7 +139,7 @@ public class TNTRunSetup implements GameSetupHandler {
 
         if (!context.getSelection().hasCompleteSelection(player)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.must_use_stick"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.must_use_stick"));
             return true;
         }
 
@@ -163,7 +163,7 @@ public class TNTRunSetup implements GameSetupHandler {
         int blocks = x * y * z;
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
-                moduleConfig.getStringFrom("language.yml", "setup_messages.floor_add_success")
+                moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_add_success")
                         .replace("{number}", String.valueOf(nextFloor))
                         .replace("{blocks}", String.valueOf(blocks)));
 
@@ -173,7 +173,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleFloorRemove(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(2)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_floor_remove"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_floor_remove"));
             return true;
         }
 
@@ -181,7 +181,7 @@ public class TNTRunSetup implements GameSetupHandler {
         Integer floorNumber = parseInt(numberStr);
         if (floorNumber == null) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    coreConfig.getLanguage("admin_commands.errors.invalid_number")
+                    coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.invalid_number")
                             .replace("{value}", numberStr));
             return true;
         }
@@ -190,7 +190,7 @@ public class TNTRunSetup implements GameSetupHandler {
         String floorKey = "f" + floorNumber;
         if (!data.has("game.floors." + floorKey + ".bounds.min.x")) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.floor_remove_not_found")
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_remove_not_found")
                             .replace("{number}", String.valueOf(floorNumber)));
             return true;
         }
@@ -206,7 +206,7 @@ public class TNTRunSetup implements GameSetupHandler {
         data.save();
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
-                moduleConfig.getStringFrom("language.yml", "setup_messages.floor_remove_success")
+                moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_remove_success")
                         .replace("{number}", String.valueOf(floorNumber)));
         return true;
     }
@@ -217,12 +217,12 @@ public class TNTRunSetup implements GameSetupHandler {
 
         if (total == 0) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.floor_list_empty"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_list_empty"));
             return true;
         }
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
-                moduleConfig.getStringFrom("language.yml", "setup_messages.floor_list_header")
+                moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_list_header")
                         .replace("{arena_id}", String.valueOf(context.getArenaId())));
 
         for (int i = 1; i <= total; i++) {
@@ -235,10 +235,10 @@ public class TNTRunSetup implements GameSetupHandler {
             int blocks = resolveBlockCount(data, floorKey);
             String autoRemoveLabel = autoRemoveTime > 0
                     ? autoRemoveTime + "s"
-                    : moduleConfig.getStringFrom("language.yml", "setup_messages.floor_list_disabled");
+                    : moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_list_disabled");
 
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.floor_list_item")
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_list_item")
                             .replace("{number}", String.valueOf(i))
                             .replace("{blocks}", String.valueOf(blocks))
                             .replace("{auto_remove}", autoRemoveLabel));
@@ -250,7 +250,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleFloorDelay(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(2)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_floor_delay"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_floor_delay"));
             return true;
         }
 
@@ -258,14 +258,14 @@ public class TNTRunSetup implements GameSetupHandler {
         Integer ticks = parseInt(ticksStr);
         if (ticks == null) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    coreConfig.getLanguage("admin_commands.errors.invalid_number")
+                    coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.invalid_number")
                             .replace("{value}", ticksStr));
             return true;
         }
 
         if (ticks < settings.getFloorDelayMinTicks() || ticks > settings.getFloorDelayMaxTicks()) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.floor_delay_invalid"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_delay_invalid"));
             return true;
         }
 
@@ -273,7 +273,7 @@ public class TNTRunSetup implements GameSetupHandler {
         context.getData().save();
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
-                moduleConfig.getStringFrom("language.yml", "setup_messages.floor_delay_success")
+                moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_delay_success")
                         .replace("{ticks}", String.valueOf(ticks)));
         return true;
     }
@@ -281,7 +281,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleFloorRemoval(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(3)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_floor_removal"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_floor_removal"));
             return true;
         }
 
@@ -293,13 +293,13 @@ public class TNTRunSetup implements GameSetupHandler {
 
         if (floorNum == null || seconds == null) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    coreConfig.getLanguage("admin_commands.errors.invalid_number"));
+                    coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.invalid_number"));
             return true;
         }
 
         if (seconds < 0 || seconds > settings.getAutoRemoveMaxSeconds()) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.floor_removal_invalid"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_removal_invalid"));
             return true;
         }
 
@@ -307,7 +307,7 @@ public class TNTRunSetup implements GameSetupHandler {
         String floorKey = "f" + floorNum;
         if (!data.has("game.floors." + floorKey + ".bounds.min.x")) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.floor_remove_not_found")
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_remove_not_found")
                             .replace("{number}", String.valueOf(floorNum)));
             return true;
         }
@@ -316,8 +316,8 @@ public class TNTRunSetup implements GameSetupHandler {
         data.save();
 
         String message = seconds == 0
-                ? moduleConfig.getStringFrom("language.yml", "setup_messages.floor_removal_disabled")
-                : moduleConfig.getStringFrom("language.yml", "setup_messages.floor_removal_success");
+                ? moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_removal_disabled")
+                : moduleConfig.getTranslation(context.getPlayer(), "setup_messages.floor_removal_success");
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
                 message.replace("{floor}", String.valueOf(floorNum))
@@ -329,7 +329,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleDoubleJump(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(2)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_doublejump"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_doublejump"));
             return true;
         }
 
@@ -340,7 +340,7 @@ public class TNTRunSetup implements GameSetupHandler {
             case "setboost" -> handleDoubleJumpBoost(context);
             default -> {
                 context.getMessagesAPI().sendRaw(context.getPlayer(),
-                        moduleConfig.getStringFrom("language.yml", "setup_messages.usage_doublejump"));
+                        moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_doublejump"));
                 yield true;
             }
         };
@@ -349,7 +349,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleDoubleJumpSet(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(2)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_doublejump_set"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_doublejump_set"));
             return true;
         }
 
@@ -357,14 +357,14 @@ public class TNTRunSetup implements GameSetupHandler {
         Integer amount = parseInt(amountStr);
         if (amount == null) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    coreConfig.getLanguage("admin_commands.errors.invalid_number")
+                    coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.invalid_number")
                             .replace("{value}", amountStr));
             return true;
         }
 
         if (amount < 0 || amount > settings.getMaxDoubleJumpUses()) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.doublejump_invalid"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.doublejump_invalid"));
             return true;
         }
 
@@ -372,8 +372,8 @@ public class TNTRunSetup implements GameSetupHandler {
         context.getData().save();
 
         String message = amount == 0
-                ? moduleConfig.getStringFrom("language.yml", "setup_messages.doublejump_disabled")
-                : moduleConfig.getStringFrom("language.yml", "setup_messages.doublejump_success");
+                ? moduleConfig.getTranslation(context.getPlayer(), "setup_messages.doublejump_disabled")
+                : moduleConfig.getTranslation(context.getPlayer(), "setup_messages.doublejump_success");
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
                 message.replace("{amount}", String.valueOf(amount)));
@@ -383,7 +383,7 @@ public class TNTRunSetup implements GameSetupHandler {
     private boolean handleDoubleJumpBoost(SetupContext<Player, CommandSender, Location> context) {
         if (!context.hasHandlerArgs(3)) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.usage_doublejump_boost"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.usage_doublejump_boost"));
             return true;
         }
 
@@ -392,21 +392,21 @@ public class TNTRunSetup implements GameSetupHandler {
 
         if (!type.equals("vertical") && !type.equals("horizontal")) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.doublejump_boost_type_invalid"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.doublejump_boost_type_invalid"));
             return true;
         }
 
         Double value = parseDouble(valueStr);
         if (value == null) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    coreConfig.getLanguage("admin_commands.errors.invalid_number")
+                    coreConfig.getLanguage(context.getPlayer(), "admin_commands.errors.invalid_number")
                             .replace("{value}", valueStr));
             return true;
         }
 
         if (value < settings.getDoubleJumpBoostMin() || value > settings.getDoubleJumpBoostMax()) {
             context.getMessagesAPI().sendRaw(context.getPlayer(),
-                    moduleConfig.getStringFrom("language.yml", "setup_messages.doublejump_boost_invalid"));
+                    moduleConfig.getTranslation(context.getPlayer(), "setup_messages.doublejump_boost_invalid"));
             return true;
         }
 
@@ -415,7 +415,7 @@ public class TNTRunSetup implements GameSetupHandler {
         context.getData().save();
 
         context.getMessagesAPI().sendRaw(context.getPlayer(),
-                moduleConfig.getStringFrom("language.yml", "setup_messages.doublejump_boost_success")
+                moduleConfig.getTranslation(context.getPlayer(), "setup_messages.doublejump_boost_success")
                         .replace("{type}", type)
                         .replace("{value}", String.valueOf(value)));
         return true;

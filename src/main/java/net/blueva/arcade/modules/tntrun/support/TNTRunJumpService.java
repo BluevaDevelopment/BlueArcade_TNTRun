@@ -46,11 +46,8 @@ public class TNTRunJumpService {
     public void clearJumps(TNTRunArenaState state, Player player, boolean updateFlightState) {
         state.getDoubleJumps().remove(player.getUniqueId());
         if (updateFlightState) {
-            // Don't disable flight for spectators - they need it to move
-            if (player.getGameMode() != org.bukkit.GameMode.SPECTATOR) {
-                player.setAllowFlight(false);
-                player.setFlying(false);
-            }
+            player.setAllowFlight(false);
+            player.setFlying(false);
         }
     }
 

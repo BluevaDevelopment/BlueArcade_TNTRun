@@ -2,7 +2,7 @@ name: TNT Run
 id: tnt_run
 version: ${revision}
 type: MINIGAME
-api-version: 3.3
+api-version: 3.4
 main: net.blueva.arcade.modules.tntrun.TNTRunModule
 
 authors:

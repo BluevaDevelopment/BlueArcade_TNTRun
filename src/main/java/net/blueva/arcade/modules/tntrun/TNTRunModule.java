@@ -33,6 +33,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
+import net.blueva.arcade.api.setup.ModuleSetupCommand;
+import net.blueva.arcade.api.setup.ModuleSetupMetadata;
+import net.blueva.arcade.api.setup.ModuleSetupStep;
+import net.blueva.arcade.api.setup.ModuleSetupStatusCheck;
+import java.util.List;
 
 public class TNTRunModule implements GameModule<Player, Location, World, Material, ItemStack, Sound, Block, Entity, Listener, EventPriority> {
 
@@ -55,9 +60,8 @@ public class TNTRunModule implements GameModule<Player, Location, World, Materia
         VoteMenuAPI voteMenu = ModuleAPI.getVoteMenuAPI();
         AchievementsAPI achievementsAPI = ModuleAPI.getAchievementsAPI();
 
-        moduleConfig.register("language.yml", 1);
-        moduleConfig.register("settings.yml", 1);
-        moduleConfig.register("achievements.yml", 1);
+        moduleConfig.register("settings.yml");
+        moduleConfig.register("achievements.yml");
 
         TNTRunSettings settings = new TNTRunSettings();
         settings.load(moduleConfig);
@@ -84,8 +88,8 @@ public class TNTRunModule implements GameModule<Player, Location, World, Materia
             voteMenu.registerGame(
                     moduleInfo.getId(),
                     Material.valueOf(moduleConfig.getString("menus.vote.item")),
-                    moduleConfig.getStringFrom("language.yml", "vote_menu.name"),
-                    moduleConfig.getStringListFrom("language.yml", "vote_menu.lore")
+                    moduleConfig.getTranslation(null, "vote_menu.name"),
+                    moduleConfig.getTranslationList(null, "vote_menu.lore")
             );
         }
     }
@@ -136,4 +140,41 @@ public class TNTRunModule implements GameModule<Player, Location, World, Materia
     public Map<String, String> getCustomPlaceholders(Player player) {
         return gameManager.getCustomPlaceholders(player);
     }
+
+
+    @Override
+    public boolean requiresSpawnCapacityValidation() {
+        return false;
+    }
+
+    @Override
+    public ModuleSetupMetadata getSetupMetadata() {
+        return new ModuleSetupMetadata() {
+
+            @Override
+            public List<ModuleSetupStep> getSetupSteps() {
+                return List.of(
+                        new ModuleSetupStep("doublejump", true, "Configure Doublejump", "Configure the module-specific doublejump setup data.", List.of("/baa game <arena> tnt_run doublejump"), "number of uses"),
+                        new ModuleSetupStep("floor", true, "Configure Floor", "Configure the module-specific floor setup data.", List.of("/baa game <arena> tnt_run floor"), "selection region")
+                );
+            }
+
+            @Override
+            public List<ModuleSetupCommand> getSetupCommands() {
+                return List.of(
+                        new ModuleSetupCommand("doublejump", "/baa game <arena> tnt_run doublejump", "Configure doublejump setup data.", true),
+                        new ModuleSetupCommand("floor", "/baa game <arena> tnt_run floor", "Configure floor setup data.", true)
+                );
+            }
+
+            @Override
+            public List<ModuleSetupStatusCheck<?, ?, ?>> getStatusChecks() {
+                return List.of(
+                        new ModuleSetupStatusCheck<>("doublejump", true, "Set the double-jump uses.", context -> context.getData().getInt("basic.double_jump_uses", -1) >= 0),
+                        new ModuleSetupStatusCheck<>("floor", true, "Add at least one floor region.", context -> context.getData().getInt("game.floors.total", 0) > 0)
+                );
+            }
+        };
+    }
+
 }

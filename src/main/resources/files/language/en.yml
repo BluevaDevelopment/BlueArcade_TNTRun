@@ -1,7 +1,13 @@
+#  ____  _               _                      _
+# | __ )| |_   _  ___   / \   _ __ ___ __ _  __| | ___
+# |  _ \| | | | |/ _ \ / _ \ | '__/ __/ _` |/ _` |/ _ \
+# | |_) | | |_| |  __// ___ \| | | (_| (_| | (_| |  __/
+# |____/|_|\__,_|\___/_/   \_|_|  \___\__,_|\__,_|\___|
+#
+# [!] Arcade by Blueva | https://blueva.net/store/blue-arcade [!]
+
 # TNT Run Module - English (UK)
 # Only TNT Run-specific content
-
-file_version: 1
 display_name: "TNT Run"
 
 description:
@@ -70,7 +76,7 @@ setup_messages:
   floor_remove_success: "{prefix} <green>Floor #{number} removed.</green>"
   floor_remove_not_found: "{prefix} <red>Floor #{number} does not exist.</red>"
   floor_list_header: "{prefix} <green>Floors for TNT Run in arena {arena_id}:</green>"
-  floor_list_item: " <gray>#{number}: {blocks} blocks | Auto-remove: {auto_remove}</gray>"
+  floor_list_item: "{prefix}  <gray>#{number}: {blocks} blocks | Auto-remove: {auto_remove}</gray>"
   floor_list_empty: "{prefix} <yellow>No floors configured yet. Add at least 1 floor.</yellow>"
   floor_list_disabled: "Disabled"
   must_use_stick: "{prefix} <red>Use the Magic Stick to select a floor area first.</red>"

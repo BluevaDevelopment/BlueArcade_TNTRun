@@ -1,11 +1,17 @@
-# TNT Run Module Settings
+#  ____  _               _                      _
+# | __ )| |_   _  ___   / \   _ __ ___ __ _  __| | ___
+# |  _ \| | | | |/ _ \ / _ \ | '__/ __/ _` |/ _` |/ _ \
+# | |_) | | |_| |  __// ___ \| | | (_| (_| | (_| |  __/
+# |____/|_|\__,_|\___/_/   \_|_|  \___\__,_|\__,_|\___|
+#
+# [!] Arcade by Blueva | https://blueva.net/store/blue-arcade [!]
 
-file_version: 2
+# TNT Run Module Settings
 
 # Visual representation in menus
 menus:
   vote:
-    item: TNT_MINECART
+    item: "TNT_MINECART"
 
 gameplay:
   # Time limit for a match in seconds
@@ -64,7 +70,7 @@ double_jump:
 blocks:
   particles:
     enabled: true
-    type: BLOCK
+    type: "BLOCK"
     # Number of particles to spawn when a block disappears
     count: 12
     # Horizontal spread for decay particles

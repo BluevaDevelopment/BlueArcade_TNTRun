@@ -1,10 +1,17 @@
-file_version: 1
+#  ____  _               _                      _
+# | __ )| |_   _  ___   / \   _ __ ___ __ _  __| | ___
+# |  _ \| | | | |/ _ \ / _ \ | '__/ __/ _` |/ _` |/ _ \
+# | |_) | | |_| |  __// ___ \| | | (_| (_| | (_| |  __/
+# |____/|_|\__,_|\___/_/   \_|_|  \___\__,_|\__,_|\___|
+#
+# [!] Arcade by Blueva | https://blueva.net/store/blue-arcade [!]
+
 category:
-  id: tnt_run
+  id: "tnt_run"
   name: "TNT Run"
   description:
     - "Achievements tied to TNT Run."
-  icon: TNT_MINECART
+  icon: "TNT_MINECART"
   sort_order: 26
 
 achievements:
@@ -12,7 +19,7 @@ achievements:
     name: "Run Rookie"
     description:
       - "Play TNT Run matches."
-    icon: LEATHER_BOOTS
+    icon: "LEATHER_BOOTS"
     phases:
       1:
         name: "First sprint"
@@ -84,7 +91,7 @@ achievements:
     name: "Floor Crusher"
     description:
       - "Drop TNT Run blocks."
-    icon: SAND
+    icon: "SAND"
     phases:
       1:
         name: "First crumble"
@@ -156,7 +163,7 @@ achievements:
     name: "Fuse Champion"
     description:
       - "Win TNT Run matches."
-    icon: TNT
+    icon: "TNT"
     phases:
       1:
         name: "First victory"
@@ -228,7 +235,7 @@ achievements:
     name: "Pace Setter"
     description:
       - "Play and drop blocks across matches."
-    icon: RED_SAND
+    icon: "RED_SAND"
     phases:
       1:
         name: "Quick laps"
@@ -300,7 +307,7 @@ achievements:
     name: "Steady Runner"
     description:
       - "Keep playing and keep winning."
-    icon: GOLDEN_BOOTS
+    icon: "GOLDEN_BOOTS"
     phases:
       1:
         name: "Warm-up wins"

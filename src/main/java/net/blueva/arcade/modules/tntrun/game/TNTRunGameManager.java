@@ -154,21 +154,20 @@ public class TNTRunGameManager {
                 endGameOnce(context, state);
                 return;
             }
-
-            String actionBarTemplate = coreConfig.getLanguage("action_bar.in_game.global");
             for (Player player : allPlayers) {
+                String actionBarTemplate = coreConfig.getLanguage(player, "action_bar.in_game.global");
                 if (!player.isOnline()) {
                     continue;
                 }
 
                 Map<String, String> customPlaceholders = getCustomPlaceholders(player);
-                customPlaceholders.put("time", String.valueOf(timeLeft[0]));
+                customPlaceholders.put("time", formatCountdownTime(timeLeft[0]));
                 customPlaceholders.put("alive", String.valueOf(alivePlayers.size()));
                 customPlaceholders.put("spectators", String.valueOf(context.getSpectators().size()));
 
                 if (actionBarTemplate != null) {
                     String actionBarMessage = actionBarTemplate
-                            .replace("{time}", String.valueOf(timeLeft[0]))
+                            .replace("{time}", formatCountdownTime(timeLeft[0]))
                             .replace("{round}", String.valueOf(context.getCurrentRound()))
                             .replace("{round_max}", String.valueOf(context.getMaxRounds()));
                     context.getMessagesAPI().sendActionBar(player, actionBarMessage);
@@ -287,7 +286,7 @@ public class TNTRunGameManager {
         }
 
         messagingService.sendDeathMessage(context, player);
-        context.eliminatePlayer(player, moduleConfig.getStringFrom("language.yml", "messages.eliminated"));
+        context.eliminatePlayer(player, moduleConfig.getTranslation(player, "messages.eliminated"));
         player.getInventory().clear();
         
         // Clear double jump state without modifying flight (we'll set it correctly below)
@@ -300,14 +299,14 @@ public class TNTRunGameManager {
         }
         
         // Set to spectator mode immediately
-        player.setGameMode(GameMode.SPECTATOR);
+        context.setPlayerSpectating(player, true);
         
         // Schedule flight activation 1 second later to avoid conflicts with double jump mechanics
         context.getSchedulerAPI().runLater(
                 "tnt_run_spectator_flight_" + arenaId + "_" + player.getUniqueId(),
                 () -> {
                     // Only enable flight if player is still in spectator mode
-                    if (player.isOnline() && player.getGameMode() == GameMode.SPECTATOR) {
+                    if (player.isOnline() && context.isPlayerSpectating(player)) {
                         player.setAllowFlight(true);
                         player.setFlying(true);
                     }
@@ -342,7 +341,7 @@ public class TNTRunGameManager {
         }
 
         // Don't touch flight state for spectators - they need it to move
-        if (player.getGameMode() == GameMode.SPECTATOR) {
+        if (context.isPlayerSpectating(player)) {
             return;
         }
 
@@ -382,7 +381,7 @@ public class TNTRunGameManager {
             placeholders.put("alive", String.valueOf(context.getAlivePlayers().size()));
             placeholders.put("spectators", String.valueOf(context.getSpectators().size()));
             if (state != null) {
-                placeholders.put("time", String.valueOf(state.getTimeLeft()));
+                placeholders.put("time", formatCountdownTime(state.getTimeLeft()));
                 placeholders.put("double_jumps", String.valueOf(jumpService.getRemainingJumps(state, player)));
                 placeholders.put("double_jumps_max", String.valueOf(state.getMaxDoubleJumps()));
             }
@@ -455,7 +454,7 @@ public class TNTRunGameManager {
         }
 
         // Don't handle double jump for spectators - they have normal flight
-        if (player.getGameMode() == GameMode.SPECTATOR) {
+        if (context.isPlayerSpectating(player)) {
             return false;
         }
 
@@ -472,4 +471,10 @@ public class TNTRunGameManager {
 
         return true;
     }
+
+    private static String formatCountdownTime(int seconds) {
+        int safeSeconds = Math.max(0, seconds);
+        return String.format("%02d:%02d", safeSeconds / 60, safeSeconds % 60);
+    }
+
 }

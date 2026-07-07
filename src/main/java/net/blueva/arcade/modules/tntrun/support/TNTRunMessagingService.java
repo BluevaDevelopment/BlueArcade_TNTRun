@@ -29,8 +29,8 @@ public class TNTRunMessagingService {
     }
 
     public void sendDescription(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context) {
-        List<String> description = moduleConfig.getStringListFrom("language.yml", "description");
         for (Player player : context.getPlayers()) {
+            List<String> description = moduleConfig.getTranslationList(player, "description");
             for (String line : description) {
                 context.getMessagesAPI().sendRaw(player, line);
             }
@@ -46,11 +46,11 @@ public class TNTRunMessagingService {
 
             context.getSoundsAPI().play(player, coreConfig.getSound("sounds.starting_game.countdown"));
 
-            String title = coreConfig.getLanguage("titles.starting_game.title")
+            String title = coreConfig.getLanguage(player, "titles.starting_game.title")
                     .replace("{game_display_name}", moduleInfo.getName())
                     .replace("{time}", String.valueOf(secondsLeft));
 
-            String subtitle = coreConfig.getLanguage("titles.starting_game.subtitle")
+            String subtitle = coreConfig.getLanguage(player, "titles.starting_game.subtitle")
                     .replace("{game_display_name}", moduleInfo.getName())
                     .replace("{time}", String.valueOf(secondsLeft));
 
@@ -64,10 +64,10 @@ public class TNTRunMessagingService {
                 continue;
             }
 
-            String title = coreConfig.getLanguage("titles.game_started.title")
+            String title = coreConfig.getLanguage(player, "titles.game_started.title")
                     .replace("{game_display_name}", moduleInfo.getName());
 
-            String subtitle = coreConfig.getLanguage("titles.game_started.subtitle")
+            String subtitle = coreConfig.getLanguage(player, "titles.game_started.subtitle")
                     .replace("{game_display_name}", moduleInfo.getName());
 
             context.getTitlesAPI().sendRaw(player, title, subtitle, 0, 20, 20);
@@ -76,12 +76,11 @@ public class TNTRunMessagingService {
     }
 
     public void sendStartTitle(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context) {
-        String title = coreConfig.getLanguage("titles.game_started.title")
-                .replace("{game_display_name}", moduleInfo.getName());
-        String subtitle = coreConfig.getLanguage("titles.game_started.subtitle")
-                .replace("{game_display_name}", moduleInfo.getName());
-
         for (Player player : context.getPlayers()) {
+            String title = coreConfig.getLanguage(player, "titles.game_started.title")
+                    .replace("{game_display_name}", moduleInfo.getName());
+            String subtitle = coreConfig.getLanguage(player, "titles.game_started.subtitle")
+                    .replace("{game_display_name}", moduleInfo.getName());
             context.getTitlesAPI().sendRaw(player, title, subtitle, 0, 20, 10);
         }
     }
@@ -122,30 +121,22 @@ public class TNTRunMessagingService {
     public void sendFloorRemovalWarning(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
                                         int floorIndex,
                                         int secondsLeft) {
-        String message = moduleConfig.getStringFrom("language.yml", "messages.floor_removal_warning");
-        if (message == null) {
-            return;
-        }
-
-        message = message.replace("{floor}", String.valueOf(floorIndex))
-                .replace("{time}", String.valueOf(secondsLeft));
-
         for (Player player : context.getPlayers()) {
-            context.getMessagesAPI().sendRaw(player, message);
+            String message = moduleConfig.getTranslation(player, "messages.floor_removal_warning");
+            if (message != null) {
+                context.getMessagesAPI().sendRaw(player, message.replace("{floor}", String.valueOf(floorIndex))
+                        .replace("{time}", String.valueOf(secondsLeft)));
+            }
         }
     }
 
     public void sendFloorRemoved(GameContext<Player, Location, World, Material, ItemStack, Sound, Block, Entity> context,
                                  int floorIndex) {
-        String message = moduleConfig.getStringFrom("language.yml", "messages.floor_removed");
-        if (message == null) {
-            return;
-        }
-
-        message = message.replace("{floor}", String.valueOf(floorIndex));
-
         for (Player player : context.getPlayers()) {
-            context.getMessagesAPI().sendRaw(player, message);
+            String message = moduleConfig.getTranslation(player, "messages.floor_removed");
+            if (message != null) {
+                context.getMessagesAPI().sendRaw(player, message.replace("{floor}", String.valueOf(floorIndex)));
+            }
         }
     }
 
@@ -154,7 +145,7 @@ public class TNTRunMessagingService {
     }
 
     private String getRandomMessage(String path) {
-        List<String> messages = moduleConfig.getStringListFrom("language.yml", path);
+        List<String> messages = moduleConfig.getTranslationList(null, path);
         if (messages == null || messages.isEmpty()) {
             return null;
         }
@@ -162,4 +153,10 @@ public class TNTRunMessagingService {
         int index = ThreadLocalRandom.current().nextInt(messages.size());
         return messages.get(index);
     }
+
+    private static String formatCountdownTime(int seconds) {
+        int safeSeconds = Math.max(0, seconds);
+        return String.format("%02d:%02d", safeSeconds / 60, safeSeconds % 60);
+    }
+
 }

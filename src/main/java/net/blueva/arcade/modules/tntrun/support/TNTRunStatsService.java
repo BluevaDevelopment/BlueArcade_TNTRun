@@ -31,11 +31,11 @@ public class TNTRunStatsService {
         }
 
         statsAPI.registerModuleStat(moduleInfo.getId(),
-                new StatDefinition("wins", moduleConfig.getStringFrom("language.yml", "stats.labels.wins", "Wins"), moduleConfig.getStringFrom("language.yml", "stats.descriptions.wins", "TNT Run wins"), StatScope.MODULE));
+                new StatDefinition("wins", moduleConfig.getTranslation(null, "stats.labels.wins"), moduleConfig.getTranslation(null, "stats.descriptions.wins"), StatScope.MODULE));
         statsAPI.registerModuleStat(moduleInfo.getId(),
-                new StatDefinition("games_played", moduleConfig.getStringFrom("language.yml", "stats.labels.games_played", "Games Played"), moduleConfig.getStringFrom("language.yml", "stats.descriptions.games_played", "TNT Run games played"), StatScope.MODULE));
+                new StatDefinition("games_played", moduleConfig.getTranslation(null, "stats.labels.games_played"), moduleConfig.getTranslation(null, "stats.descriptions.games_played"), StatScope.MODULE));
         statsAPI.registerModuleStat(moduleInfo.getId(),
-                new StatDefinition("blocks_dropped", moduleConfig.getStringFrom("language.yml", "stats.labels.blocks_dropped", "Blocks dropped"), moduleConfig.getStringFrom("language.yml", "stats.descriptions.blocks_dropped", "Blocks dropped in TNT Run"), StatScope.MODULE));
+                new StatDefinition("blocks_dropped", moduleConfig.getTranslation(null, "stats.labels.blocks_dropped"), moduleConfig.getTranslation(null, "stats.descriptions.blocks_dropped"), StatScope.MODULE));
     }
 
     public void resetArena(int arenaId) {
