@@ -50,7 +50,6 @@ public class TNTRunStatsService {
         if (!arenaWinners.containsKey(arenaId)) {
             arenaWinners.put(arenaId, player.getUniqueId());
             statsAPI.addModuleStat(player, moduleInfo.getId(), "wins", 1);
-            statsAPI.addGlobalStat(player, "wins", 1);
         }
     }
 
